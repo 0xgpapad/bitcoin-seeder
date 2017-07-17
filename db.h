@@ -105,7 +105,8 @@ public:
   
   bool IsGood() const {
 	  
-	if (clientSubVersion.find("1.14.3") == std::string::npos) return false;
+	if (!(clientSubVersion.find("1.14.3") != std::string::npos || 
+		  clientSubVersion.find("1.14.4") != std::string::npos)) return false;
     
 	if (ip.GetPort() != GetDefaultPort()) return false;
     if (!(services & NODE_NETWORK)) return false;
