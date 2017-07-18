@@ -28,6 +28,21 @@ std::string static inline ToString(const CService &ip) {
   return str;
 }
 
+static bool hasPortOpen(CService& ip, uint16_t port) {
+    CService httpService = CService(ip, port);
+    SOCKET socket;
+    bool success = ConnectSocket(httpService, socket, 500); // 500ms of timeout
+    if (socket != INVALID_SOCKET) {
+        closesocket(socket);
+    }
+
+    return success;
+}
+
+static bool hasHttpServer(CService& ip) {
+    return hasPortOpen(ip, 80) || hasPortOpen(ip, 443);
+}
+
 class CAddrStat {
 private:
   float weight;
@@ -104,11 +119,10 @@ public:
   }
   
   bool IsGood() const {
-	  
-	if (!(clientSubVersion.find("1.14.3") != std::string::npos || 
-		  clientSubVersion.find("1.14.4") != std::string::npos)) return false;
+    if (!(clientSubVersion.find("1.14.3") != std::string::npos ||
+            clientSubVersion.find("1.14.4") != std::string::npos)) return false;
     
-	if (ip.GetPort() != GetDefaultPort()) return false;
+    if (ip.GetPort() != GetDefaultPort()) return false;
     if (!(services & NODE_NETWORK)) return false;
     if (!ip.IsRoutable()) return false;
     if (clientVersion && clientVersion < REQUIRE_VERSION) return false;
