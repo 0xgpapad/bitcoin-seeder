@@ -29,14 +29,12 @@ std::string static inline ToString(const CService &ip) {
 }
 
 static bool hasPortOpen(CService& ip, uint16_t port) {
-    CService httpService = CService(ip, port);
-    SOCKET socket;
-    bool success = ConnectSocket(httpService, socket, 500); // 500ms of timeout
-    if (socket != INVALID_SOCKET) {
-        closesocket(socket);
-    }
+    struct in_addr addr;
+    addr.s_addr = inet_addr(ip.ToStringIP().c_str());
 
-    return success;
+    CService service = CService(addr, port);
+    SOCKET sock = INVALID_SOCKET;
+    return ConnectSocket(service, sock, 1000);
 }
 
 static bool hasHttpServer(CService& ip) {
@@ -246,14 +244,14 @@ public:
   std::map<CService, time_t> banned; // nodes that are banned, with their unban time (a)
 
   void GetStats(CAddrDbStats &stats) {
-    SHARED_CRITICAL_BLOCK(cs) {
+//    SHARED_CRITICAL_BLOCK(cs) {
       stats.nBanned = banned.size();
       stats.nAvail = idToInfo.size();
       stats.nTracked = ourId.size();
       stats.nGood = goodId.size();
       stats.nNew = unkId.size();
       stats.nAge = time(NULL) - idToInfo[ourId[0]].ourLastTry;
-    }
+//    }
   }
 
   void ResetIgnores() {
