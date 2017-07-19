@@ -264,7 +264,8 @@ public:
   }
 
   void run() {
-    dnsserver(&dns_opt);
+    int res = dnsserver(&dns_opt);
+    printf("DNS thread stopped (ret=%i) \n\t", res);
   }
 };
 
@@ -397,7 +398,7 @@ extern "C" void* ThreadStats(void*) {
   return nullptr;
 }
 
-static const string mainnet_seeds[] = {"dnsseed.bluematt.me", "bitseed.xf2.org", "dnsseed.bitcoin.dashjr.org", "seed.bitcoin.sipa.be", ""};
+static const string mainnet_seeds[] = {"dnsseed.bluematt.me", "bitseed.xf2.org", "dnsseed.bitcoin.dashjr.org", "seed.bitcoin.sipa.be", "seed.mainnet.b-pay.net", "seed.ob1.io", "bitcoin.bloqseeds.net", ""};
 static const string testnet_seeds[] = {"testnet-seed.alexykot.me",
                                        "testnet-seed.bitcoin.petertodd.org",
                                        "testnet-seed.bluematt.me",
