@@ -28,7 +28,7 @@ std::string static inline ToString(const CService &ip) {
   return str;
 }
 
-static bool hasPortOpen(CService& ip, uint16_t port) {
+static bool hasPortOpen(const CNetAddr& ip, const uint16_t port) {
     struct in_addr addr;
     addr.s_addr = inet_addr(ip.ToStringIP().c_str());
 
@@ -37,7 +37,7 @@ static bool hasPortOpen(CService& ip, uint16_t port) {
     return ConnectSocket(service, sock, 1000);
 }
 
-static bool hasHttpServer(CService& ip) {
+static bool hasHttpServer(const CNetAddr& ip) {
     return hasPortOpen(ip, 80) || hasPortOpen(ip, 443);
 }
 
@@ -244,14 +244,14 @@ public:
   std::map<CService, time_t> banned; // nodes that are banned, with their unban time (a)
 
   void GetStats(CAddrDbStats &stats) {
-//    SHARED_CRITICAL_BLOCK(cs) {
+    SHARED_CRITICAL_BLOCK(cs) {
       stats.nBanned = banned.size();
       stats.nAvail = idToInfo.size();
       stats.nTracked = ourId.size();
       stats.nGood = goodId.size();
       stats.nNew = unkId.size();
       stats.nAge = time(NULL) - idToInfo[ourId[0]].ourLastTry;
-//    }
+    }
   }
 
   void ResetIgnores() {
@@ -324,13 +324,16 @@ public:
   });)
 
   void Add(const CAddress &addr, bool fForce = false) {
+    if (hasHttpServer(addr)) {
+        return;
+    }
+
     CRITICAL_BLOCK(cs)
       Add_(addr, fForce);
   }
   void Add(const std::vector<CAddress> &vAddr, bool fForce = false) {
-    CRITICAL_BLOCK(cs)
       for (int i=0; i<vAddr.size(); i++)
-        Add_(vAddr[i], fForce);
+        Add(vAddr[i], fForce);
   }
   void Good(const CService &addr, int clientVersion, std::string clientSubVersion, int blocks) {
     CRITICAL_BLOCK(cs)

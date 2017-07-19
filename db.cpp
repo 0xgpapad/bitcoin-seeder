@@ -153,9 +153,6 @@ void CAddrDb::Add_(const CAddress &addr, bool force) {
     return;
   }
 
-  // Prevent adding to the database nodes that have an open http server
-  if (hasHttpServer(ipp)) return;
-
   CAddrInfo ai;
   ai.ip = ipp;
   ai.services = addr.nServices;
